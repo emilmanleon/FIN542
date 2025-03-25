@@ -1,0 +1,1463 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIN542 - Introduction to International Financial Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(93, 92, 222, 0.7);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(93, 92, 222, 1);
+        }
+        /* Animation classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 50;
+        }
+        .progress-bar {
+            height: 4px;
+            background: #5D5CDE;
+            width: 0%;
+        }
+        
+        /* Custom card hover effects */
+        .custom-card {
+            transition: all 0.3s ease;
+        }
+        .custom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Quiz styling */
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            background-color: rgba(93, 92, 222, 0.1);
+        }
+        .quiz-option.selected {
+            background-color: rgba(93, 92, 222, 0.2);
+            border-color: #5D5CDE;
+        }
+        .quiz-option.correct {
+            background-color: rgba(52, 211, 153, 0.2);
+            border-color: #34D399;
+        }
+        .quiz-option.incorrect {
+            background-color: rgba(248, 113, 113, 0.2);
+            border-color: #F87171;
+        }
+        
+        /* Custom list styling */
+        .custom-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .custom-list li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: #5D5CDE;
+        }
+        
+        /* Dark mode color adjustments */
+        .dark .custom-list li:before {
+            background-color: #8584E8;
+        }
+        
+        /* Image-caption container */
+        .img-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        .img-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .img-container:hover .img-caption {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <!-- Progress bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Fixed navigation -->
+    <nav class="fixed top-0 inset-x-0 z-40 bg-white dark:bg-gray-900 shadow-md py-2 transition-colors duration-300">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="#" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">
+                <span class="text-5D5CDE">FIN542</span> International Financial Management
+            </a>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block text-yellow-300"></i>
+                </button>
+                <div class="hidden md:flex space-x-4">
+                    <a href="#section1" class="text-gray-600 dark:text-gray-300 hover:text-5D5CDE dark:hover:text-5D5CDE">Basics</a>
+                    <a href="#section2" class="text-gray-600 dark:text-gray-300 hover:text-5D5CDE dark:hover:text-5D5CDE">MNCs</a>
+                    <a href="#section3" class="text-gray-600 dark:text-gray-300 hover:text-5D5CDE dark:hover:text-5D5CDE">Theories</a>
+                    <a href="#section4" class="text-gray-600 dark:text-gray-300 hover:text-5D5CDE dark:hover:text-5D5CDE">Expansion</a>
+                    <a href="#section5" class="text-gray-600 dark:text-gray-300 hover:text-5D5CDE dark:hover:text-5D5CDE">Quiz</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-5D5CDE dark:hover:text-5D5CDE focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white dark:bg-gray-800 shadow-lg rounded-b-lg absolute top-full left-0 right-0 transition-all duration-300">
+            <div class="container mx-auto px-4 py-2">
+                <a href="#section1" class="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Basics</a>
+                <a href="#section2" class="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">MNCs</a>
+                <a href="#section3" class="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Theories</a>
+                <a href="#section4" class="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Expansion</a>
+                <a href="#section5" class="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Quiz</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero section -->
+    <header class="pt-24 pb-12 md:pt-32 md:pb-20 bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 md:pr-8">
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+                        Introduction to <span class="text-5D5CDE">International Financial Management</span>
+                    </h1>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">
+                        Chapter 1 - FIN542 | Semester Oct 2023 - Feb 2024
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-8">
+                        Explore the world of multinational financial management, theories of international business, and 
+                        the global strategies that drive modern corporations.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#section1" class="px-6 py-3 bg-5D5CDE text-white rounded-lg shadow-md hover:shadow-lg transition-all">
+                            Start Learning
+                        </a>
+                        <a href="#section5" class="px-6 py-3 border border-5D5CDE text-5D5CDE dark:text-white rounded-lg hover:bg-5D5CDE hover:text-white transition-all">
+                            Take Quiz
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 mt-8 md:mt-0">
+                    <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_yd8fbnml.json" background="transparent" speed="1" style="width: 100%; height: 300px;" loop="" autoplay=""></lottie-player>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="py-12">
+        <!-- Section 1: Basics of Multinational Financial Management -->
+        <section id="section1" class="py-12 fade-in">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 md:pr-8">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            Multinational Financial Management
+                        </h2>
+                        <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                            Multinational Financial Management is concerned with how to optimize the various corporate decisions 
+                            across national boundaries.
+                        </p>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">Key Focus Areas:</h3>
+                            <ul class="custom-list">
+                                <li class="mb-2">Working Capital Management</li>
+                                <li class="mb-2">Investment Decisions</li>
+                                <li class="mb-2">Financing Strategies</li>
+                                <li class="mb-2">Dividend Policy</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-blue-50 dark:bg-gray-800 rounded-lg mb-6">
+                            <h4 class="font-semibold mb-2 text-blue-600 dark:text-blue-400">Key Principles:</h4>
+                            <ul class="space-y-2">
+                                <li><i class="fas fa-globe-americas mr-2 text-5D5CDE"></i> Money has no boundary</li>
+                                <li><i class="fas fa-chart-line mr-2 text-5D5CDE"></i> Financial markets have become highly integrated</li>
+                                <li><i class="fas fa-shopping-cart mr-2 text-5D5CDE"></i> Consumption and production have become globally interconnected</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 mt-8 md:mt-0">
+                        <div class="img-container mb-4">
+                            <img src="https://cdn.jsdelivr.net/gh/storyset/storyset@latest/International%20business/rafiki.svg" alt="Multinational Financial Management" class="w-full">
+                            <div class="img-caption text-sm">Global financial operations across borders</div>
+                        </div>
+                        
+                        <div class="mt-6 rounded-lg overflow-hidden shadow-lg">
+                            <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <i class="fab fa-youtube text-red-500 text-5xl mb-2"></i>
+                                    <p class="text-gray-600 dark:text-gray-300">YouTube video: Introduction to Multinational Financial Management</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real World Example -->
+                <div class="mt-12 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Real World Example
+                    </h3>
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-3/4">
+                            <h4 class="font-semibold mb-2 text-gray-800 dark:text-gray-200">Apple Inc.'s Global Financial Strategy</h4>
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                                Apple Inc. manages a complex multinational financial operation with subsidiaries in Ireland, 
+                                Singapore, and various other countries. The company optimizes its:
+                            </p>
+                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
+                                <li><strong>Working Capital:</strong> Through just-in-time manufacturing</li>
+                                <li><strong>Investments:</strong> Strategic acquisition of technology companies globally</li>
+                                <li><strong>Financing:</strong> Issuing bonds in different markets to take advantage of lower interest rates</li>
+                                <li><strong>Dividend Policy:</strong> Balancing dividend payments with growth investments</li>
+                            </ul>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                This strategic approach has helped Apple maintain its position as one of the world's most valuable companies.
+                            </p>
+                        </div>
+                        <div class="md:w-1/4 flex justify-center items-center mt-4 md:mt-0">
+                            <div class="rounded-full bg-white dark:bg-gray-700 p-4 shadow-md">
+                                <i class="fab fa-apple text-6xl text-gray-800 dark:text-gray-200"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Rise of MNCs -->
+        <section id="section2" class="py-12 bg-gray-50 dark:bg-gray-800 fade-in">
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">
+                    The Rise of Multinational Corporations
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">What is a Multinational Corporation?</h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            An MNC is defined as a company that has operating subsidiaries located in foreign countries.
+                            The parent company is usually located in the home country while several subsidiaries are in foreign countries.
+                        </p>
+                        <p class="text-gray-700 dark:text-gray-300">
+                            According to Foley et al. (2021), MNCs are defined as business entities with one or more foreign 
+                            affiliates in which the parent company holds at least a 10% ownership stake.
+                        </p>
+                        <div class="mt-6 flex justify-center">
+                            <img src="https://cdn.jsdelivr.net/gh/storyset/storyset@latest/Global%20business/pana.svg" alt="MNC Structure" class="h-48">
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Objectives of MNCs</h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            The primary objective of MNCs is to make decisions that are best for the corporation as a whole.
+                        </p>
+                        <div class="bg-blue-50 dark:bg-gray-700 p-4 rounded-lg mb-4">
+                            <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                <i class="fas fa-bullseye text-5D5CDE mr-2"></i> 
+                                MNCs emphasize group performance rather than individual parts.
+                            </p>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            This holistic approach allows MNCs to optimize resources across countries, taking advantage of 
+                            different market conditions, tax systems, and business environments.
+                        </p>
+                        <div class="mt-4 flex justify-center">
+                            <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_ufkfxbyj.json" background="transparent" speed="1" style="width: 200px; height: 150px;" loop="" autoplay=""></lottie-player>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Types of MNCs -->
+                <div class="mb-12">
+                    <h3 class="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">Types of Multinational Corporations</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Type 1 -->
+                        <div class="custom-card bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="bg-indigo-100 dark:bg-indigo-900 p-4 flex justify-center">
+                                <i class="fas fa-gem text-3xl text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                            <div class="p-5">
+                                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Raw Materials Seekers</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                    MNCs that aim to exploit raw materials found in foreign countries, either for export or further processing.
+                                </p>
+                                <div class="mt-3 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-block text-xs text-gray-600 dark:text-gray-400">
+                                    Example: Shell, Rio Tinto, Exxon Mobil
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type 2 -->
+                        <div class="custom-card bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="bg-green-100 dark:bg-green-900 p-4 flex justify-center">
+                                <i class="fas fa-shopping-cart text-3xl text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div class="p-5">
+                                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Market Seekers</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                    Companies that venture overseas to produce and sell in foreign markets to meet local demand or export to markets beyond their home.
+                                </p>
+                                <div class="mt-3 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-block text-xs text-gray-600 dark:text-gray-400">
+                                    Example: McDonald's, Tesco, Nestlé
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type 3 -->
+                        <div class="custom-card bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="bg-red-100 dark:bg-red-900 p-4 flex justify-center">
+                                <i class="fas fa-chart-line text-3xl text-red-600 dark:text-red-400"></i>
+                            </div>
+                            <div class="p-5">
+                                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Cost Production Efficiency Seekers</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                    Firms that seek to produce in countries with little competition or lower costs of production factors.
+                                </p>
+                                <div class="mt-3 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-block text-xs text-gray-600 dark:text-gray-400">
+                                    Example: Nike, Apple, Samsung
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type 4 -->
+                        <div class="custom-card bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="bg-yellow-100 dark:bg-yellow-900 p-4 flex justify-center">
+                                <i class="fas fa-lightbulb text-3xl text-yellow-600 dark:text-yellow-400"></i>
+                            </div>
+                            <div class="p-5">
+                                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Knowledge Seekers</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                    Companies that expand abroad to gain knowledge and experience not available in their home market.
+                                </p>
+                                <div class="mt-3 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-block text-xs text-gray-600 dark:text-gray-400">
+                                    Example: Tech companies, Research partnerships
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type 5 -->
+                        <div class="custom-card bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="bg-purple-100 dark:bg-purple-900 p-4 flex justify-center">
+                                <i class="fas fa-users text-3xl text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div class="p-5">
+                                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Keeping Domestic Customers</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                    Firms that venture into foreign markets by following their primary customers who go abroad.
+                                </p>
+                                <div class="mt-3 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-block text-xs text-gray-600 dark:text-gray-400">
+                                    Example: Banking services, Component suppliers
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type 6 -->
+                        <div class="custom-card bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="bg-blue-100 dark:bg-blue-900 p-4 flex justify-center">
+                                <i class="fas fa-university text-3xl text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="p-5">
+                                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Exploiting Financial Market Imperfections</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                    Companies that conduct foreign direct investment to reduce risks through international diversification.
+                                </p>
+                                <div class="mt-3 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-block text-xs text-gray-600 dark:text-gray-400">
+                                    Example: Investment banks, Insurance companies
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- YouTube video placeholder -->
+                <div class="rounded-lg overflow-hidden shadow-lg">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <div class="text-center p-4">
+                            <i class="fab fa-youtube text-red-500 text-5xl mb-2"></i>
+                            <p class="text-gray-600 dark:text-gray-300">YouTube video: The Rise and Impact of Multinational Corporations</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real World Example -->
+                <div class="mt-12 p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Real World Example
+                    </h3>
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-2/3">
+                            <h4 class="font-semibold mb-2 text-gray-800 dark:text-gray-200">Unilever: A Mix of MNC Types</h4>
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                                Unilever represents a multinational corporation that combines multiple MNC types:
+                            </p>
+                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
+                                <li><strong>Market Seeker:</strong> Adapts products to local tastes (e.g., different Lipton tea formulations for different markets)</li>
+                                <li><strong>Raw Materials Seeker:</strong> Sources palm oil and other ingredients from countries like Indonesia and Malaysia</li>
+                                <li><strong>Cost Efficiency Seeker:</strong> Manufactures in lower-cost regions while maintaining quality standards</li>
+                                <li><strong>Knowledge Seeker:</strong> Establishes R&amp;D centers globally to tap into different innovation ecosystems</li>
+                            </ul>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                This multi-faceted approach has allowed Unilever to become one of the world's largest consumer goods companies,
+                                with products sold in over 190 countries.
+                            </p>
+                        </div>
+                        <div class="md:w-1/3 flex justify-center items-center mt-6 md:mt-0">
+                            <div class="p-4">
+                                <img src="https://cdn.jsdelivr.net/gh/storyset/storyset@latest/Business%20decisions/pana.svg" alt="Unilever Global Strategy" class="h-48">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Theories of International Business -->
+        <section id="section3" class="py-12 fade-in">
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">
+                    Theories of International Business
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <!-- Theory 1 -->
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden custom-card">
+                        <div class="h-2 bg-blue-500"></div>
+                        <div class="p-6">
+                            <div class="flex justify-center mb-4">
+                                <div class="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                    <i class="fas fa-balance-scale text-2xl text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 text-center text-gray-800 dark:text-gray-200">
+                                Theory of Comparative Advantage
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                Each country should specialize in the production and export of goods it can produce with relative efficiency.
+                            </p>
+                            <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-4">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Specialize in goods with highest relative efficiency</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Import goods that cannot be produced efficiently</span>
+                                </li>
+                            </ul>
+                            <div class="mt-4 bg-blue-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <h4 class="font-medium text-blue-700 dark:text-blue-400 mb-1">Example:</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    Japan exports electronics and imports agricultural products, while Brazil exports agricultural goods and imports electronics.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Theory 2 -->
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden custom-card">
+                        <div class="h-2 bg-purple-500"></div>
+                        <div class="p-6">
+                            <div class="flex justify-center mb-4">
+                                <div class="h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                                    <i class="fas fa-puzzle-piece text-2xl text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 text-center text-gray-800 dark:text-gray-200">
+                                Theory of Imperfect Markets
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                Countries differ with respect to the resources available for the production of goods.
+                            </p>
+                            <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-4">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Firms capitalize on foreign country's resources</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Exploitation of market imperfections and differences</span>
+                                </li>
+                            </ul>
+                            <div class="mt-4 bg-purple-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <h4 class="font-medium text-purple-700 dark:text-purple-400 mb-1">Example:</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    US tech companies setting up R&amp;D centers in India to leverage lower labor costs and strong technical education.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Theory 3 -->
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden custom-card">
+                        <div class="h-2 bg-green-500"></div>
+                        <div class="p-6">
+                            <div class="flex justify-center mb-4">
+                                <div class="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                    <i class="fas fa-sync-alt text-2xl text-green-600 dark:text-green-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 text-center text-gray-800 dark:text-gray-200">
+                                Theory of Product Life Cycle
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                As time passes, products may reach maturity or declining stages in the home country.
+                            </p>
+                            <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-4">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Firms produce in foreign markets to reduce costs</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Gain new customers in emerging markets</span>
+                                </li>
+                            </ul>
+                            <div class="mt-4 bg-green-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <h4 class="font-medium text-green-700 dark:text-green-400 mb-1">Example:</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    Television manufacturers moving production from Japan to Malaysia, then to Vietnam as products mature.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Life Cycle Animation -->
+                <div class="mb-12 bg-white dark:bg-gray-900 rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 text-center">Product Life Cycle in International Business</h3>
+                    
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/2 px-4">
+                            <div class="mb-6">
+                                <canvas id="productLifeCycleChart" width="400" height="300"></canvas>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 px-4">
+                            <div class="space-y-4">
+                                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                    <h4 class="font-medium text-blue-700 dark:text-blue-400 mb-1">Introduction</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Production begins in home country. Product is innovative and unstandardized.
+                                        Companies focus on domestic market.
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                                    <h4 class="font-medium text-green-700 dark:text-green-400 mb-1">Growth</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Increasing foreign demand leads to exports. Competitors emerge in advanced nations.
+                                        Companies begin producing in foreign developed markets.
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                                    <h4 class="font-medium text-yellow-700 dark:text-yellow-400 mb-1">Maturity</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Product becomes standardized. Companies shift production to developing countries
+                                        with lower costs. Home country may become net importer.
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
+                                    <h4 class="font-medium text-red-700 dark:text-red-400 mb-1">Decline</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Production concentrated in developing countries. Developed nations import.
+                                        Companies focus on cost minimization or product innovation.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- YouTube video placeholder -->
+                <div class="rounded-lg overflow-hidden shadow-lg">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <div class="text-center p-4">
+                            <i class="fab fa-youtube text-red-500 text-5xl mb-2"></i>
+                            <p class="text-gray-600 dark:text-gray-300">YouTube video: Theories of International Business Explained</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real World Example -->
+                <div class="mt-12 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Real World Example
+                    </h3>
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-3/4">
+                            <h4 class="font-semibold mb-2 text-gray-800 dark:text-gray-200">Toyota's Global Strategy</h4>
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                                Toyota exemplifies the application of international business theories:
+                            </p>
+                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
+                                <li><strong>Comparative Advantage:</strong> Leverages Japan's engineering expertise while outsourcing component production</li>
+                                <li><strong>Imperfect Markets:</strong> Establishes manufacturing in countries with lower labor costs and favorable regulations</li>
+                                <li><strong>Product Life Cycle:</strong> Introduced the Prius first in Japan, then in developed markets like the US, and later adapted models for emerging markets</li>
+                            </ul>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                Toyota's strategy has evolved from exporting Japanese-made vehicles to a sophisticated global production network with 
+                                regional manufacturing hubs tailored to local market conditions.
+                            </p>
+                        </div>
+                        <div class="md:w-1/4 flex justify-center items-center mt-4 md:mt-0">
+                            <div class="bg-white dark:bg-gray-700 p-4 rounded-full shadow-md">
+                                <i class="fas fa-car text-red-500 text-6xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Process of Overseas Expansion -->
+        <section id="section4" class="py-12 bg-gray-50 dark:bg-gray-800 fade-in">
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">
+                    Process of Overseas Expansion
+                </h2>
+                
+                <div class="mb-12">
+                    <div class="flex flex-wrap justify-center">
+                        <div class="w-full max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                            <div class="p-6">
+                                <div class="flex flex-col md:flex-row items-center">
+                                    <div class="md:w-1/2 pr-6">
+                                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Expansion Stages</h3>
+                                        <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                            Companies typically follow a progression of international involvement, starting with lower-risk approaches 
+                                            and gradually increasing their commitment to foreign markets.
+                                        </p>
+                                        <div id="expansion-stages-visual" class="relative h-96 flex flex-col items-center">
+                                            <!-- SVG path connecting stages -->
+                                            <svg class="absolute inset-0 w-full h-full z-0" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M50,30 C100,50 125,120 50,150 C25,170 125,220 50,270 C25,290 125,340 50,390 C25,410 125,460 60,490" stroke="#5D5CDE" stroke-width="3" fill="none" stroke-dasharray="6" class="dark:stroke-indigo-400"></path>
+                                            </svg>
+                                            
+                                            <!-- Stage buttons along the path -->
+                                            <div class="z-10 absolute top-[5%] left-[10%]">
+                                                <button class="expansion-stage-btn w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:bg-indigo-600 transition" data-stage="exporting">
+                                                    <i class="fas fa-ship text-2xl"></i>
+                                                </button>
+                                            </div>
+                                            <div class="z-10 absolute top-[25%] left-[10%]">
+                                                <button class="expansion-stage-btn w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:bg-indigo-600 transition" data-stage="licensing">
+                                                    <i class="fas fa-file-contract text-2xl"></i>
+                                                </button>
+                                            </div>
+                                            <div class="z-10 absolute top-[45%] left-[10%]">
+                                                <button class="expansion-stage-btn w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:bg-indigo-600 transition" data-stage="franchising">
+                                                    <i class="fas fa-store text-2xl"></i>
+                                                </button>
+                                            </div>
+                                            <div class="z-10 absolute top-[65%] left-[10%]">
+                                                <button class="expansion-stage-btn w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:bg-indigo-600 transition" data-stage="joint-ventures">
+                                                    <i class="fas fa-handshake text-2xl"></i>
+                                                </button>
+                                            </div>
+                                            <div class="z-10 absolute top-[85%] left-[10%]">
+                                                <button class="expansion-stage-btn w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:bg-indigo-600 transition" data-stage="overseas-production">
+                                                    <i class="fas fa-industry text-2xl"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="md:w-1/2 mt-6 md:mt-0">
+                                        <div id="stage-description" class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                                            <h4 id="stage-title" class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Exporting</h4>
+                                            <p id="stage-text" class="text-gray-600 dark:text-gray-400 mb-4">
+                                                A conservative approach to penetrate foreign markets, especially when demand abroad is uncertain. Requires minimal capital and offers low start-up costs. The risk is low and profits can be immediate. Allows companies to learn about foreign market conditions before further expansion.
+                                            </p>
+                                            <div id="stage-example" class="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                                                <h5 class="font-medium text-indigo-700 dark:text-indigo-400 mb-1">Example:</h5>
+                                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                    A small electronics manufacturer in Taiwan exporting components to the US market without establishing a physical presence there.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Risks and Benefits -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <!-- Risks -->
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                        <div class="h-2 bg-red-500"></div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i> Risks of International Business
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Foreign Exchange Risk</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Due to fluctuations in currency exchange rates
+                                    </p>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Political Risk</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Related to political stability, government changes, riots
+                                    </p>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Economic Risk</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Interest rates, inflation, currency controls
+                                    </p>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Geographical Risk</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Location factors, climate, natural disasters
+                                    </p>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Legal Risk</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Different laws and regulations in host countries
+                                    </p>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Socio-cultural Risk</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Religion, ethnic differences, customs, beliefs
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Benefits -->
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                        <div class="h-2 bg-green-500"></div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i> Benefits of International Business
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-1">
+                                        <i class="fas fa-box-open text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Variety and Quality of Goods</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Access to a wider variety of products and services from around the world
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-1">
+                                        <i class="fas fa-chart-line text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Lower Production Costs</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Economies of scale and access to cheaper resources
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-1">
+                                        <i class="fas fa-microchip text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Technology Transfer</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Sharing of technological knowledge and know-how across borders
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-1">
+                                        <i class="fas fa-rocket text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Economic Growth</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Creation of jobs, increased trade, and economic development
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-1">
+                                        <i class="fas fa-globe-americas text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Diplomatic Relationships</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Improved international relations and cooperation between countries
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Financial Management Goals -->
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden mb-12">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
+                            Multinational Financial Management Goals
+                        </h3>
+                        
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/2 pr-6">
+                                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg mb-6">
+                                    <h4 class="font-medium mb-3 text-gray-800 dark:text-gray-200">Primary Goal</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-semibold">To maximize the shareholders' wealth</span> as measured by the share price.
+                                    </p>
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                    This goal remains consistent with domestic financial management, but requires considering 
+                                    additional factors such as currency fluctuations, political risks, and different legal systems.
+                                </p>
+                            </div>
+                            
+                            <div class="md:w-1/2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+                                        <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Centralized Financial Management</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Parent company managers control the financial decisions of foreign subsidiaries
+                                        </p>
+                                        <div class="flex justify-center mt-3">
+                                            <i class="fas fa-sitemap text-indigo-500 text-3xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+                                        <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Decentralized Financial Management</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Subsidiary managers make financial decisions pertaining to their subsidiaries
+                                        </p>
+                                        <div class="flex justify-center mt-3">
+                                            <i class="fas fa-project-diagram text-indigo-500 text-3xl"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- YouTube video placeholder -->
+                <div class="rounded-lg overflow-hidden shadow-lg">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <div class="text-center p-4">
+                            <i class="fab fa-youtube text-red-500 text-5xl mb-2"></i>
+                            <p class="text-gray-600 dark:text-gray-300">YouTube video: The International Expansion Process</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real World Example -->
+                <div class="mt-12 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Real World Example
+                    </h3>
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-3/4">
+                            <h4 class="font-semibold mb-2 text-gray-800 dark:text-gray-200">Starbucks: A Global Expansion Journey</h4>
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                                Starbucks demonstrates a methodical approach to international expansion:
+                            </p>
+                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
+                                <li><strong>Initial Exporting:</strong> Began by selling coffee beans to international markets</li>
+                                <li><strong>Joint Ventures:</strong> Partnered with local companies in Japan (Sazaby Inc.) and the UK (Seattle Coffee Company)</li>
+                                <li><strong>Licensing:</strong> Used in some markets like airports and hotels</li>
+                                <li><strong>Wholly-Owned Subsidiaries:</strong> Eventually established company-owned stores in key markets</li>
+                                <li><strong>Franchising:</strong> Expanded through franchising in markets like South Korea and the Philippines</li>
+                            </ul>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                Starbucks adapted its entry strategies based on local market conditions, cultural preferences, and regulatory environments. 
+                                This flexible approach allowed the company to grow from a single store in Seattle to over 33,000 stores in 80+ countries.
+                            </p>
+                        </div>
+                        <div class="md:w-1/4 flex justify-center items-center mt-4 md:mt-0">
+                            <div class="p-4">
+                                <div class="w-24 h-24 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center shadow-md">
+                                    <i class="fas fa-coffee text-green-600 text-5xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Interactive Quiz -->
+        <section id="section5" class="py-12 fade-in">
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">
+                    Test Your Knowledge
+                </h2>
+                
+                <div class="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                                Chapter 1 Quiz
+                            </h3>
+                            <div class="text-gray-600 dark:text-gray-400">
+                                Question <span id="current-question">1</span> of <span id="total-questions">5</span>
+                            </div>
+                        </div>
+                        
+                        <div id="quiz-container">
+                            <!-- Questions will be injected here by JavaScript -->
+                        </div>
+                        
+                        <div class="mt-6 flex justify-between">
+                            <button id="prev-question" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition hidden">
+                                <i class="fas fa-arrow-left mr-2"></i> Previous
+                            </button>
+                            <div class="flex-grow"></div>
+                            <button id="next-question" class="px-4 py-2 bg-5D5CDE text-white rounded-lg hover:bg-indigo-700 transition">
+                                Next <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="results-container" class="max-w-3xl mx-auto mt-8 bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                            Quiz Results
+                        </h3>
+                        
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-gray-600 dark:text-gray-400">Your Score</span>
+                                <span id="score-display" class="font-semibold text-gray-800 dark:text-gray-200">0/5</span>
+                            </div>
+                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div id="score-bar" class="h-full bg-5D5CDE" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="feedback-message" class="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg mb-6">
+                            <p class="text-blue-700 dark:text-blue-400">Complete the quiz to see your results!</p>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <button id="restart-quiz" class="px-6 py-3 bg-5D5CDE text-white rounded-lg hover:bg-indigo-700 transition">
+                                <i class="fas fa-redo mr-2"></i> Restart Quiz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 dark:bg-black text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <h3 class="text-xl font-bold mb-4">FIN542 - International Financial Management</h3>
+                    <p class="text-gray-400">
+                        Chapter 1 - Introduction to IFM<br>
+                        Semester Oct 2023 - Feb 2024
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Quick Links</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#section1" class="hover:text-white transition">Basics</a></li>
+                            <li><a href="#section2" class="hover:text-white transition">MNCs</a></li>
+                            <li><a href="#section3" class="hover:text-white transition">Theories</a></li>
+                            <li><a href="#section4" class="hover:text-white transition">Expansion</a></li>
+                            <li><a href="#section5" class="hover:text-white transition">Quiz</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Resources</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition">Textbook</a></li>
+                            <li><a href="#" class="hover:text-white transition">Lecture Notes</a></li>
+                            <li><a href="#" class="hover:text-white transition">Journal Articles</a></li>
+                            <li><a href="#" class="hover:text-white transition">Case Studies</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Connect</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition">Course Portal</a></li>
+                            <li><a href="#" class="hover:text-white transition">Discussions</a></li>
+                            <li><a href="#" class="hover:text-white transition">Office Hours</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-500">
+                <p>© 2023 FIN542 Course Materials. Educational use only.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // Check for system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Listen for changes in system preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+        
+        // Toggle button
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+        
+        // Mobile menu
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Close mobile menu when clicking on links
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+        
+        // Scroll animation for sections
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            fadeElements.forEach(element => observer.observe(element));
+        });
+        
+        // Progress bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+        
+        // Expansion Stages Interactive
+        const stageButtons = document.querySelectorAll('.expansion-stage-btn');
+        const stageTitle = document.getElementById('stage-title');
+        const stageText = document.getElementById('stage-text');
+        const stageExample = document.getElementById('stage-example');
+        
+        const stageData = {
+            'exporting': {
+                title: 'Exporting',
+                text: 'A conservative approach to penetrate foreign markets, especially when demand abroad is uncertain. Requires minimal capital and offers low start-up costs. The risk is low and profits can be immediate. Allows companies to learn about foreign market conditions before further expansion.',
+                example: 'A small electronics manufacturer in Taiwan exporting components to the US market without establishing a physical presence there.'
+            },
+            'licensing': {
+                title: 'Licensing',
+                text: 'A company (licensor) grants a license by providing its technology to a local company (licensee) to produce the licensor\'s products in exchange for royalties, copyrights, patents, trademarks and other payments. Minimal investment requirements, faster market entry time and fewer financial and legal risks involved.',
+                example: 'Coca-Cola licensing its formula and brand to bottling companies in foreign countries that produce and distribute the product locally.'
+            },
+            'franchising': {
+                title: 'Franchising',
+                text: 'Similar to licensing whereby the company (franchisor) provides a specialized sale or service strategy, support assistance and possibly an initial investment to a local company (franchisee) in exchange for periodic royalties and other fees. Requires minimal investment, faster market entry time and minimal risks.',
+                example: 'McDonald\'s franchising its business model to local entrepreneurs in countries like India, adapting its menu to local tastes while maintaining core operational standards.'
+            },
+            'joint-ventures': {
+                title: 'Joint Ventures',
+                text: 'A jointly owned and operated company by two or more firms of different nationalities. Most joint ventures allow the firms to apply their respective advantages in a given project. This helps companies share risks and combine complementary strengths.',
+                example: 'Sony-Ericsson was a joint venture between Japanese electronics company Sony and Swedish telecommunications company Ericsson to develop and manufacture mobile phones.'
+            },
+            'overseas-production': {
+                title: 'Overseas Production',
+                text: 'Companies set up local production facilities to capture opportunities in foreign markets that wouldn\'t be possible through exporting. A firm can venture into overseas production either by acquiring an existing local company or establishing its own new foreign subsidiaries. This represents the highest level of commitment and investment.',
+                example: 'Toyota establishing manufacturing plants in the United States, with full ownership and control over operations, product quality, and distribution.'
+            }
+        };
+        
+        stageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const stage = button.getAttribute('data-stage');
+                stageTitle.textContent = stageData[stage].title;
+                stageText.textContent = stageData[stage].text;
+                stageExample.querySelector('p').textContent = stageData[stage].example;
+                
+                // Highlight the active button
+                stageButtons.forEach(btn => {
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = '';
+                });
+                button.style.transform = 'scale(1.1)';
+                button.style.boxShadow = '0 10px 25px -5px rgba(93, 92, 222, 0.4)';
+            });
+        });
+        
+        // Product Life Cycle Chart
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('productLifeCycleChart').getContext('2d');
+            
+            // Custom chart drawing
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, 400, 0);
+            gradient.addColorStop(0, '#4F46E5');   // Introduction - Blue
+            gradient.addColorStop(0.3, '#10B981'); // Growth - Green
+            gradient.addColorStop(0.6, '#F59E0B'); // Maturity - Yellow
+            gradient.addColorStop(1, '#EF4444');   // Decline - Red
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 400, 300);
+            
+            // Set line style
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = gradient;
+            
+            // Draw the product life cycle curve
+            ctx.beginPath();
+            ctx.moveTo(20, 250);  // Starting point
+            
+            // Introduction - slow rise
+            ctx.bezierCurveTo(
+                50, 240,  // control point 1
+                70, 210,  // control point 2
+                100, 180  // end point
+            );
+            
+            // Growth - steep rise
+            ctx.bezierCurveTo(
+                120, 150,  // control point 1
+                140, 100,  // control point 2
+                180, 80    // end point
+            );
+            
+            // Maturity - plateau
+            ctx.bezierCurveTo(
+                220, 60,   // control point 1
+                250, 60,   // control point 2
+                280, 80    // end point
+            );
+            
+            // Decline - fall
+            ctx.bezierCurveTo(
+                310, 100,  // control point 1
+                330, 150,  // control point 2
+                380, 250   // end point
+            );
+            
+            ctx.stroke();
+            
+            // Add labels
+            ctx.font = '12px Arial';
+            ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#D1D5DB' : '#4B5563';
+            
+            ctx.fillText('Introduction', 50, 270);
+            ctx.fillText('Growth', 140, 270);
+            ctx.fillText('Maturity', 240, 270);
+            ctx.fillText('Decline', 330, 270);
+            
+            // Add axes
+            ctx.beginPath();
+            ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#6B7280' : '#9CA3AF';
+            ctx.lineWidth = 1;
+            
+            // Y-axis
+            ctx.moveTo(20, 250);
+            ctx.lineTo(20, 40);
+            ctx.stroke();
+            
+            // X-axis
+            ctx.moveTo(20, 250);
+            ctx.lineTo(380, 250);
+            ctx.stroke();
+            
+            // Axis labels
+            ctx.fillText('Time', 380, 270);
+            ctx.save();
+            ctx.translate(10, 150);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Sales Volume', 0, 0);
+            ctx.restore();
+        });
+        
+        // Quiz functionality
+        const questions = [
+            {
+                question: "What is the primary objective of Multinational Corporations (MNCs)?",
+                options: [
+                    "To maximize profits in the home country",
+                    "To make decisions that are best for the corporation as a whole",
+                    "To minimize tax payments globally",
+                    "To expand into as many countries as possible"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "According to the Theory of Comparative Advantage, countries should:",
+                options: [
+                    "Produce everything domestically to avoid imports",
+                    "Specialize in goods they can produce with the highest relative efficiency",
+                    "Always focus on high-tech industries regardless of efficiency",
+                    "Import all goods to save on production costs"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which of the following is NOT a type of MNC based on their motives?",
+                options: [
+                    "Raw Materials Seekers",
+                    "Market Seekers",
+                    "Cost Production Efficiency Seekers",
+                    "Profit Maximization Seekers"
+                ],
+                correctAnswer: 3
+            },
+            {
+                question: "What is the correct sequence of overseas expansion stages from lowest to highest commitment?",
+                options: [
+                    "Exporting → Licensing → Franchising → Joint Ventures → Overseas Production",
+                    "Joint Ventures → Exporting → Licensing → Franchising → Overseas Production",
+                    "Licensing → Franchising → Exporting → Joint Ventures → Overseas Production",
+                    "Exporting → Joint Ventures → Licensing → Franchising → Overseas Production"
+                ],
+                correctAnswer: 0
+            },
+            {
+                question: "What is the primary goal of Multinational Financial Management?",
+                options: [
+                    "To maximize tax benefits across different countries",
+                    "To diversify operations across multiple countries",
+                    "To maximize the shareholders' wealth as measured by the share price",
+                    "To maintain equal growth across all subsidiaries"
+                ],
+                correctAnswer: 2
+            }
+        ];
+        
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const prevButton = document.getElementById('prev-question');
+        const nextButton = document.getElementById('next-question');
+        const currentQuestionDisplay = document.getElementById('current-question');
+        const totalQuestionsDisplay = document.getElementById('total-questions');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const scoreBar = document.getElementById('score-bar');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        
+        totalQuestionsDisplay.textContent = questions.length;
+        
+        function renderQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            let html = `
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">
+                        ${currentQuestionIndex + 1}. ${question.question}
+                    </h4>
+                    <div class="space-y-3">
+            `;
+            
+            question.options.forEach((option, index) => {
+                const selected = userAnswers[currentQuestionIndex] === index ? 'selected' : '';
+                html += `
+                    <div class="quiz-option p-3 border rounded-lg cursor-pointer ${selected}" data-index="${index}">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-5 w-5 mt-0.5">
+                                <div class="h-5 w-5 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center ${selected ? 'bg-5D5CDE border-5D5CDE' : ''}">
+                                    ${selected ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <span class="text-gray-700 dark:text-gray-300">${option}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            quizContainer.innerHTML = html;
+            
+            // Add click handlers for options
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const index = parseInt(option.getAttribute('data-index'));
+                    userAnswers[currentQuestionIndex] = index;
+                    renderQuestion(); // Re-render to update the UI
+                });
+            });
+            
+            // Update button states
+            prevButton.classList.toggle('hidden', currentQuestionIndex === 0);
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextButton.innerHTML = 'Finish <i class="fas fa-check ml-2"></i>';
+            } else {
+                nextButton.innerHTML = 'Next <i class="fas fa-arrow-right ml-2"></i>';
+            }
+            
+            currentQuestionDisplay.textContent = currentQuestionIndex + 1;
+        }
+        
+        function calculateScore() {
+            let score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer === questions[index].correctAnswer) {
+                    score++;
+                }
+            });
+            return score;
+        }
+        
+        function showResults() {
+            const score = calculateScore();
+            const percentage = (score / questions.length) * 100;
+            
+            scoreDisplay.textContent = `${score}/${questions.length}`;
+            scoreBar.style.width = `${percentage}%`;
+            
+            let feedbackText = '';
+            if (percentage >= 80) {
+                feedbackText = 'Excellent! You have a strong understanding of International Financial Management basics.';
+                feedbackMessage.className = 'p-4 bg-green-50 dark:bg-green-900/30 rounded-lg mb-6';
+                feedbackMessage.innerHTML = `<p class="text-green-700 dark:text-green-400">${feedbackText}</p>`;
+            } else if (percentage >= 60) {
+                feedbackText = 'Good job! You have a solid grasp of the key concepts, but there\'s room for improvement.';
+                feedbackMessage.className = 'p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg mb-6';
+                feedbackMessage.innerHTML = `<p class="text-blue-700 dark:text-blue-400">${feedbackText}</p>`;
+            } else {
+                feedbackText = 'You might want to review the material again to strengthen your understanding of the concepts.';
+                feedbackMessage.className = 'p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg mb-6';
+                feedbackMessage.innerHTML = `<p class="text-yellow-700 dark:text-yellow-400">${feedbackText}</p>`;
+            }
+            
+            resultsContainer.classList.remove('hidden');
+        }
+        
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+        
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                // Last question, show results
+                showResults();
+            }
+        });
+        
+        restartQuizButton.addEventListener('click', () => {
+            userAnswers = new Array(questions.length).fill(null);
+            currentQuestionIndex = 0;
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+        
+        // Initialize the quiz
+        renderQuestion();
+    </script>
+
+
+</body></html>
