@@ -1,0 +1,2077 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking Operations | Chapter 3: Customer Accounts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" defer=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#5D5CDE',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s ease-in-out infinite',
+                    }
+                }
+            }
+        };
+    </script>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        .card-flip {
+            perspective: 1000px;
+        }
+        
+        .card-flip-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .card-flip-front, .card-flip-back {
+            backface-visibility: hidden;
+        }
+        
+        .card-flip-back {
+            transform: rotateY(180deg);
+        }
+        
+        .card-flip.flipped .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .quiz-option:hover {
+            transform: translateY(-4px);
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option.correct {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-color: rgb(16, 185, 129);
+        }
+
+        .quiz-option.incorrect {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-color: rgb(239, 68, 68);
+        }
+        
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .tab-content {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        .tab-content.active {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300" x-data="{ 
+          currentTab: 'overview',
+          progress: 0,
+          quizStarted: false,
+          quizQuestions: [
+              {
+                  question: 'Which account type typically offers cheque facilities?',
+                  options: ['Savings Account', 'Current Account', 'Fixed Deposit', 'Trust Account'],
+                  correctAnswer: 1,
+                  userAnswer: null
+              },
+              {
+                  question: 'Up to how much are deposits federally insured by PIDM in Malaysia?',
+                  options: ['RM100,000', 'RM150,000', 'RM200,000', 'RM250,000'],
+                  correctAnswer: 3,
+                  userAnswer: null
+              },
+              {
+                  question: 'Which type of account requires a Trust Deed to be submitted to the bank?',
+                  options: ['Individual Account', 'Joint Account', 'Trust Account', 'Partnership Account'],
+                  correctAnswer: 2,
+                  userAnswer: null
+              }
+          ],
+          showModal: false,
+          modalContent: '',
+          currentQuizIndex: 0,
+          showExampleModal: false,
+          currentExample: {},
+          quizComplete: false,
+          score: 0,
+          darkMode: false,
+          examples: [
+              {
+                  title: 'Savings Account Example',
+                  content: 'Sarah, a 25-year-old professional, opens a savings account with RHB Bank with an initial deposit of RM500. She receives a debit card and sets up mobile banking. The account earns 0.75% interest annually. She uses this account for regular savings and emergency funds, benefiting from PIDM protection up to RM250,000.',
+                  icon: 'fa-wallet'
+              },
+              {
+                  title: 'Current Account Example',
+                  content: 'Ahmad owns a small business and needs to make frequent payments to suppliers. He opens a current account with Maybank, depositing RM2,000 initially. The account comes with a checkbook and he maintains a minimum balance of RM1,000 to avoid monthly charges. He uses online banking for fund transfers and bill payments.',
+                  icon: 'fa-money-check-alt'
+              },
+              {
+                  title: 'Fixed Deposit Example',
+                  content: 'Mrs. Lee has RM20,000 saved from her year-end bonus. She decides to place it in a 12-month fixed deposit with CIMB Bank at 2.50% p.a. interest rate. The bank calculates that she will earn RM500 in interest after one year. If she withdraws the money before the 12-month period, she might forfeit some or all of the interest earned.',
+                  icon: 'fa-lock'
+              },
+              {
+                  title: 'Joint Account Example',
+                  content: 'Married couple John and Lisa open a joint savings account with Hong Leong Bank to manage household expenses. They both deposit their monthly salaries and pay bills from this account. They specify in the mandate that either of them can sign to withdraw funds. The account has a survivorship clause so that if one dies, the other automatically has full ownership.',
+                  icon: 'fa-users'
+              },
+              {
+                  title: 'Trust Account Example',
+                  content: 'Mr. Wong establishes a trust for his 12-year-old daughter\'s education. He appoints his brother as trustee and deposits RM50,000 in a trust account with Public Bank. The trustee manages the funds according to the Trust Deed, which specifies the funds can only be used for education expenses until his daughter turns 21.',
+                  icon: 'fa-shield-alt'
+              }
+          ],
+          updateProgress() {
+              let visitedCount = document.querySelectorAll('.section-visited').length;
+              let totalSections = document.querySelectorAll('.progress-section').length;
+              this.progress = Math.round((visitedCount / totalSections) * 100);
+          },
+          selectQuizOption(questionIndex, optionIndex) {
+              if (this.quizQuestions[questionIndex].userAnswer !== null) return;
+              
+              this.quizQuestions[questionIndex].userAnswer = optionIndex;
+              
+              if (optionIndex === this.quizQuestions[questionIndex].correctAnswer) {
+                  this.score++;
+              }
+              
+              // Move to next question after a delay
+              if (questionIndex < this.quizQuestions.length - 1) {
+                  setTimeout(() => {
+                      this.currentQuizIndex++;
+                  }, 1000);
+              } else {
+                  this.quizComplete = true;
+              }
+          },
+          restartQuiz() {
+              this.quizQuestions.forEach(q => q.userAnswer = null);
+              this.currentQuizIndex = 0;
+              this.quizComplete = false;
+              this.score = 0;
+          },
+          markSectionVisited() {
+              if (!this.$el.classList.contains('section-visited')) {
+                  this.$el.classList.add('section-visited');
+                  this.updateProgress();
+              }
+          },
+          showExample(example) {
+              this.currentExample = example;
+              this.showExampleModal = true;
+          }
+      }" x-init="
+          if (window.matchMedia &amp;&amp; window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              darkMode = true;
+              document.documentElement.classList.add('dark');
+          }
+          
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+              if (event.matches) {
+                  darkMode = true;
+                  document.documentElement.classList.add('dark');
+              } else {
+                  darkMode = false;
+                  document.documentElement.classList.remove('dark');
+              }
+          });
+      ">
+
+    <!-- Top Navigation Bar -->
+    <nav class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-university text-primary-500 text-2xl"></i>
+                <h1 class="text-xl font-bold">Banking Operations</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative" x-data="{ showProgress: false }">
+                    <div @click="showProgress = !showProgress" class="cursor-pointer flex items-center space-x-2">
+                        <svg width="36" height="36">
+                            <circle stroke="#e2e8f0" stroke-width="3" fill="transparent" r="16" cx="18" cy="18"></circle>
+                            <circle class="progress-ring-circle" stroke="#5D5CDE" stroke-width="3" fill="transparent" r="16" cx="18" cy="18" :stroke-dasharray="2 * Math.PI * 16" :stroke-dashoffset="2 * Math.PI * 16 * (1 - progress / 100)"></circle>
+                        </svg>
+                        <span class="text-sm font-medium" x-text="`${progress}%`"></span>
+                    </div>
+                    <div x-show="showProgress" @click.away="showProgress = false" class="absolute right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-64">
+                        <h3 class="font-semibold mb-2">Your Progress</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Overview</span>
+                                <i class="fas fa-check-circle text-green-500" x-show="document.querySelector('#overview').classList.contains('section-visited')"></i>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Bank Deposit Accounts</span>
+                                <i class="fas fa-check-circle text-green-500" x-show="document.querySelector('#deposit-accounts').classList.contains('section-visited')"></i>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Types of Accounts</span>
+                                <i class="fas fa-check-circle text-green-500" x-show="document.querySelector('#account-types').classList.contains('section-visited')"></i>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>PIDM</span>
+                                <i class="fas fa-check-circle text-green-500" x-show="document.querySelector('#pidm').classList.contains('section-visited')"></i>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Knowledge Check</span>
+                                <i class="fas fa-check-circle text-green-500" x-show="quizComplete"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button @click="darkMode = !darkMode; darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Topic Navigation Tabs -->
+    <div class="bg-gray-100 dark:bg-gray-800 shadow-inner">
+        <div class="container mx-auto px-4 py-1">
+            <div class="flex overflow-x-auto space-x-1 py-2 no-scrollbar">
+                <button @click="currentTab = 'overview'" :class="{'text-primary-500 border-b-2 border-primary-500 font-medium': currentTab === 'overview'}" class="px-4 py-2 whitespace-nowrap transition-colors duration-200">
+                    <i class="fas fa-info-circle mr-1"></i> Overview
+                </button>
+                <button @click="currentTab = 'deposit-accounts'" :class="{'text-primary-500 border-b-2 border-primary-500 font-medium': currentTab === 'deposit-accounts'}" class="px-4 py-2 whitespace-nowrap transition-colors duration-200">
+                    <i class="fas fa-wallet mr-1"></i> Bank Deposit Accounts
+                </button>
+                <button @click="currentTab = 'account-types'" :class="{'text-primary-500 border-b-2 border-primary-500 font-medium': currentTab === 'account-types'}" class="px-4 py-2 whitespace-nowrap transition-colors duration-200">
+                    <i class="fas fa-users mr-1"></i> Types of Accounts
+                </button>
+                <button @click="currentTab = 'pidm'" :class="{'text-primary-500 border-b-2 border-primary-500 font-medium': currentTab === 'pidm'}" class="px-4 py-2 whitespace-nowrap transition-colors duration-200">
+                    <i class="fas fa-shield-alt mr-1"></i> PIDM
+                </button>
+                <button @click="currentTab = 'quiz'" :class="{'text-primary-500 border-b-2 border-primary-500 font-medium': currentTab === 'quiz'}" class="px-4 py-2 whitespace-nowrap transition-colors duration-200">
+                    <i class="fas fa-question-circle mr-1"></i> Knowledge Check
+                </button>
+                <button @click="currentTab = 'examples'" :class="{'text-primary-500 border-b-2 border-primary-500 font-medium': currentTab === 'examples'}" class="px-4 py-2 whitespace-nowrap transition-colors duration-200">
+                    <i class="fas fa-lightbulb mr-1"></i> Real-life Examples
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Overview Tab -->
+        <section id="overview" x-show="currentTab === 'overview'" class="progress-section" x-effect="if(currentTab === 'overview') markSectionVisited()">
+            <div class="tab-content active">
+                <div class="flex flex-col md:flex-row items-center mb-8">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8">
+                        <h2 class="text-3xl font-bold mb-4 text-primary-600 dark:text-primary-400">Chapter 3: Operations of Customer Accounts</h2>
+                        <p class="text-lg mb-6">This chapter covers the essential aspects of customer accounts in commercial banking, including deposit types, account classifications, and deposit protection.</p>
+                        <div class="bg-primary-50 dark:bg-gray-800 p-4 rounded-lg border-l-4 border-primary-500">
+                            <h3 class="font-semibold mb-2">Learning Outcomes</h3>
+                            <p>At the end of this chapter, you will be able to:</p>
+                            <ul class="list-disc pl-5 mt-2 space-y-1">
+                                <li>Explain the different types of deposit accounts offered by commercial banks</li>
+                                <li>Describe the characteristics and operational requirements of various customer account types</li>
+                                <li>Understand the role and protection mechanisms of PIDM</li>
+                                <li>Identify the procedures for opening and managing different types of accounts</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 flex justify-center">
+                        <lottie-player src="https://assets9.lottiefiles.com/packages/lf20_l4xfojtl.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop="" autoplay=""></lottie-player>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform hover:scale-105 duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-wallet text-primary-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold">Bank Deposit Accounts</h3>
+                        </div>
+                        <p>Explore various deposit account options including savings, current, fixed deposits, and negotiable certificates of deposit.</p>
+                        <button @click="currentTab = 'deposit-accounts'" class="mt-4 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-medium flex items-center">
+                            Learn more <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform hover:scale-105 duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-users text-primary-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold">Types of Accounts</h3>
+                        </div>
+                        <p>Learn about different account types including individual, joint, minor, trust, and business accounts.</p>
+                        <button @click="currentTab = 'account-types'" class="mt-4 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-medium flex items-center">
+                            Learn more <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform hover:scale-105 duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-shield-alt text-primary-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold">PIDM Protection</h3>
+                        </div>
+                        <p>Understand how Perbadanan Insurans Deposit Malaysia protects depositors and the financial system.</p>
+                        <button @click="currentTab = 'pidm'" class="mt-4 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-medium flex items-center">
+                            Learn more <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bank Deposit Accounts Tab -->
+        <section id="deposit-accounts" x-show="currentTab === 'deposit-accounts'" class="progress-section" x-effect="if(currentTab === 'deposit-accounts') markSectionVisited()">
+            <div class="tab-content" :class="{ 'active': currentTab === 'deposit-accounts' }">
+                <h2 class="text-3xl font-bold mb-6 text-primary-600 dark:text-primary-400">Bank Deposit Accounts</h2>
+                
+                <div x-data="{ currentDepositTab: 'savings' }" class="mb-8">
+                    <div class="flex overflow-x-auto space-x-1 mb-6 border-b border-gray-200 dark:border-gray-700">
+                        <button @click="currentDepositTab = 'savings'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': currentDepositTab === 'savings'}" class="px-4 py-2 transition-colors duration-200">
+                            Savings Account
+                        </button>
+                        <button @click="currentDepositTab = 'current'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': currentDepositTab === 'current'}" class="px-4 py-2 transition-colors duration-200">
+                            Current Account
+                        </button>
+                        <button @click="currentDepositTab = 'fixed'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': currentDepositTab === 'fixed'}" class="px-4 py-2 transition-colors duration-200">
+                            Fixed Deposits
+                        </button>
+                        <button @click="currentDepositTab = 'ncd'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': currentDepositTab === 'ncd'}" class="px-4 py-2 transition-colors duration-200">
+                            Negotiable Certificates
+                        </button>
+                    </div>
+                    
+                    <!-- Savings Account -->
+                    <div x-show="currentDepositTab === 'savings'" class="fade-in">
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-2/3 pr-0 md:pr-8">
+                                <h3 class="text-2xl font-semibold mb-4">Savings Account</h3>
+                                <p class="mb-4">A savings account is an interest-bearing deposit account held at a bank or other financial institution that provides a modest interest rate.</p>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Key Features:</h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Interest-bearing account with typically lower rates than fixed deposits</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Federally insured by PIDM for up to RM250,000</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Convenient access to funds for everyday transactions</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Minimum initial deposit requirement (RM20-RM1,000)</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Available to individuals aged 18 and above (12-18 with parent/guardian approval)</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5">
+                                    <h4 class="font-semibold mb-3">Account Opening Procedure:</h4>
+                                    <ol class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">1</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Identification Verification</strong> - Provide valid identification (MyKad/passport)</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">2</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Complete Application Form</strong> - Fill and sign the savings account application form</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">3</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Initial Deposit</strong> - Deposit the minimum required amount</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">4</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Additional Documentation</strong> - For minors (12-18), parent/guardian must be present</p>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="md:w-1/3 mt-6 md:mt-0">
+                                <div class="sticky top-24">
+                                    <lottie-player src="https://assets8.lottiefiles.com/private_files/lf30_F6EtR7.json" background="transparent" speed="1" style="width: 100%; height: 220px;" loop="" autoplay=""></lottie-player>
+                                    
+                                    <div class="bg-primary-50 dark:bg-gray-700 rounded-lg p-4 mt-6">
+                                        <h4 class="font-semibold mb-2">Did You Know?</h4>
+                                        <p>Most modern savings accounts come with a debit card and mobile banking access, allowing easy transfers and payments without visiting a branch.</p>
+                                    </div>
+                                    
+                                    <div class="mt-6">
+                                        <button @click="showExample(examples[0])" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                            <i class="fas fa-lightbulb mr-2"></i> Real-life Example
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Account -->
+                    <div x-show="currentDepositTab === 'current'" class="fade-in">
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-2/3 pr-0 md:pr-8">
+                                <h3 class="text-2xl font-semibold mb-4">Current Account</h3>
+                                <p class="mb-4">A current account is a type of bank account designed for frequent transactions, offering check facilities and no fixed placement period or transaction limits.</p>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Key Features:</h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Cheque facilities for making payments</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>No fixed placement period or transaction limits</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Access to bank overdraft services</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Higher minimum initial deposit (RM500-RM1,000)</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Minimum balance requirements to avoid charges</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Understanding Cheques:</h4>
+                                    <div class="relative overflow-hidden bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                                        <img src="https://i.imgur.com/KVkSIRm.png" alt="Cheque components" class="w-full rounded-lg">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50 dark:to-gray-900 flex items-center justify-end">
+                                            <div class="p-4 w-1/2">
+                                                <h5 class="font-semibold mb-2">Cheque Components</h5>
+                                                <ul class="text-sm space-y-1">
+                                                    <li>• Date of issuance</li>
+                                                    <li>• Payee's name</li>
+                                                    <li>• Amount in words and figures</li>
+                                                    <li>• Drawer's signature</li>
+                                                    <li>• Crossings for security</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5">
+                                    <h4 class="font-semibold mb-3">Opening Requirements:</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-file-alt text-primary-500 mt-1 mr-3"></i>
+                                            <span>Valid identification (MyKad/passport)</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-money-bill-wave text-primary-500 mt-1 mr-3"></i>
+                                            <span>Minimum initial deposit (RM500-RM1,000)</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-user-friends text-primary-500 mt-1 mr-3"></i>
+                                            <span>Some banks require an introducer (existing account holder)</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-clipboard-list text-primary-500 mt-1 mr-3"></i>
+                                            <span>Completed application form with signature</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-calendar-alt text-primary-500 mt-1 mr-3"></i>
+                                            <span>Minimum age of 18 years</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="md:w-1/3 mt-6 md:mt-0">
+                                <div class="sticky top-24">
+                                    <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_1cazwtnc.json" background="transparent" speed="1" style="width: 100%; height: 220px;" loop="" autoplay=""></lottie-player>
+                                    
+                                    <div class="bg-yellow-50 dark:bg-gray-700 rounded-lg p-4 mt-6">
+                                        <h4 class="font-semibold text-yellow-800 dark:text-yellow-400 mb-2">Important Note:</h4>
+                                        <p>An undischarged bankrupt cannot operate a current account, whether personal, joint, or partnership, except when acting as an agent. Bankrupts are also prohibited from acting as directors of limited companies.</p>
+                                    </div>
+                                    
+                                    <div class="mt-6">
+                                        <button @click="showExample(examples[1])" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                            <i class="fas fa-lightbulb mr-2"></i> Real-life Example
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed Deposits -->
+                    <div x-show="currentDepositTab === 'fixed'" class="fade-in">
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-2/3 pr-0 md:pr-8">
+                                <h3 class="text-2xl font-semibold mb-4">Fixed Deposits</h3>
+                                <p class="mb-4">Fixed deposit accounts are investment accounts where customers deposit money for a predetermined period at a fixed interest rate, with guaranteed returns upon maturity.</p>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Key Features:</h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Fixed term periods from 1 month to 60 months</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Higher interest rates than savings accounts</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Minimum deposit typically starting from RM500</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Interest may be paid monthly, half-yearly, or at maturity</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Early withdrawal may result in reduced or no interest payment</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Interest Rates Comparison:</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                                <tr>
+                                                    <th class="py-3 px-4 text-left">Term Period</th>
+                                                    <th class="py-3 px-4 text-left">Typical Interest Rate</th>
+                                                    <th class="py-3 px-4 text-left">Min. Deposit (RM)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                <tr>
+                                                    <td class="py-3 px-4">1 month</td>
+                                                    <td class="py-3 px-4">1.50% - 1.80%</td>
+                                                    <td class="py-3 px-4">5,000</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">3 months</td>
+                                                    <td class="py-3 px-4">1.80% - 2.00%</td>
+                                                    <td class="py-3 px-4">500</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">6 months</td>
+                                                    <td class="py-3 px-4">1.90% - 2.10%</td>
+                                                    <td class="py-3 px-4">500</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">12 months</td>
+                                                    <td class="py-3 px-4">2.00% - 2.50%</td>
+                                                    <td class="py-3 px-4">500</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">24+ months</td>
+                                                    <td class="py-3 px-4">2.20% - 2.80%</td>
+                                                    <td class="py-3 px-4">500</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Note: Rates are indicative and vary between financial institutions and over time.</p>
+                                </div>
+                                
+                                <div class="bg-red-50 dark:bg-gray-700 rounded-lg p-5">
+                                    <h4 class="font-semibold text-red-700 dark:text-red-400 mb-3">Early Withdrawal Penalties:</h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-2"></i>
+                                            <span>1-month FD: No interest if withdrawn before maturity</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-2"></i>
+                                            <span>3, 6, 9, 12, 24 months FD: No interest if withdrawn before 3 months</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-2"></i>
+                                            <span>Early withdrawals may be subject to administrative fees</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="md:w-1/3 mt-6 md:mt-0">
+                                <div class="sticky top-24">
+                                    <lottie-player src="https://assets2.lottiefiles.com/private_files/lf30_zdzeqbgu.json" background="transparent" speed="1" style="width: 100%; height: 220px;" loop="" autoplay=""></lottie-player>
+                                    
+                                    <div class="bg-primary-50 dark:bg-gray-700 rounded-lg p-4 mt-6">
+                                        <h4 class="font-semibold mb-2">Fixed Deposit Calculator</h4>
+                                        <div x-data="{ principal: 10000, rate: 2.5, tenure: 12, result: 0 }">
+                                            <div class="space-y-3 mb-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-1">Principal Amount (RM)</label>
+                                                    <input type="number" x-model="principal" min="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm text-base focus:ring-primary-500 focus:border-primary-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-1">Interest Rate (%)</label>
+                                                    <input type="number" x-model="rate" min="0" max="10" step="0.1" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm text-base focus:ring-primary-500 focus:border-primary-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-1">Tenure (months)</label>
+                                                    <input type="number" x-model="tenure" min="1" max="60" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm text-base focus:ring-primary-500 focus:border-primary-500">
+                                                </div>
+                                            </div>
+                                            <button @click="result = (principal * rate * tenure / 12 / 100).toFixed(2)" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                                Calculate Interest
+                                            </button>
+                                            <div class="mt-3 text-center" x-show="result > 0">
+                                                <p class="text-sm">Interest Earned:</p>
+                                                <p class="text-2xl font-bold text-primary-500">RM <span x-text="result"></span></p>
+                                                <p class="text-sm">Total Amount at Maturity:</p>
+                                                <p class="font-bold">RM <span x-text="(parseFloat(principal) + parseFloat(result)).toFixed(2)"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6">
+                                        <button @click="showExample(examples[2])" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                            <i class="fas fa-lightbulb mr-2"></i> Real-life Example
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Negotiable Certificates -->
+                    <div x-show="currentDepositTab === 'ncd'" class="fade-in">
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-2/3 pr-0 md:pr-8">
+                                <h3 class="text-2xl font-semibold mb-4">Negotiable Certificates of Deposit</h3>
+                                <p class="mb-4">The Ringgit Negotiable Instrument of Deposit (NID) is a transferable deposit placed for a specific period at an agreed interest rate. Unlike fixed deposits, it does not bear the holder's name and can be sold in the secondary market at any time.</p>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Key Features:</h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Transferable financial instrument that can be traded in secondary markets</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Does not bear any holder's name (unlike Fixed Deposits)</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Can be converted to cash by selling to the secondary market</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Only valid if issued by an institution authorized by Bank Negara Malaysia</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                            <span>Typically higher minimum investment amounts</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                                    <h4 class="font-semibold mb-3">Differences between NID and Fixed Deposit:</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                                <tr>
+                                                    <th class="py-3 px-4 text-left">Feature</th>
+                                                    <th class="py-3 px-4 text-left">Negotiable Certificate of Deposit</th>
+                                                    <th class="py-3 px-4 text-left">Fixed Deposit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                <tr>
+                                                    <td class="py-3 px-4">Transferability</td>
+                                                    <td class="py-3 px-4">Freely transferable</td>
+                                                    <td class="py-3 px-4">Not transferable</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">Holder Identification</td>
+                                                    <td class="py-3 px-4">No name on certificate</td>
+                                                    <td class="py-3 px-4">Name recorded on receipt</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">Liquidity</td>
+                                                    <td class="py-3 px-4">Can be sold in secondary market</td>
+                                                    <td class="py-3 px-4">Early withdrawal with penalty</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">Minimum Amount</td>
+                                                    <td class="py-3 px-4">Typically higher</td>
+                                                    <td class="py-3 px-4">As low as RM500</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 px-4">Target Market</td>
+                                                    <td class="py-3 px-4">Institutional investors</td>
+                                                    <td class="py-3 px-4">Retail customers</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-5">
+                                    <h4 class="font-semibold text-blue-700 dark:text-blue-400 mb-3">Important Considerations:</h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                                            <span>Market price of NCDs fluctuates with interest rate changes</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                                            <span>Verify issuer is authorized by Bank Negara Malaysia</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                                            <span>Understand secondary market liquidity conditions</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                                            <span>May be subject to different tax treatment than regular deposits</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="md:w-1/3 mt-6 md:mt-0">
+                                <div class="sticky top-24">
+                                    <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_jig2uigy.json" background="transparent" speed="1" style="width: 100%; height: 220px;" loop="" autoplay=""></lottie-player>
+                                    
+                                    <div class="bg-primary-50 dark:bg-gray-700 rounded-lg p-4 mt-6">
+                                        <h4 class="font-semibold mb-2">Market Insight</h4>
+                                        <p>NCDs are primarily used by larger businesses and institutional investors that require more flexibility than traditional fixed deposits. The secondary market for NCDs allows holders to exit investments before maturity, making them a more liquid option for organizations with changing cash flow needs.</p>
+                                    </div>
+                                    
+                                    <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                                        <h4 class="font-semibold mb-2">NID Process Flow</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">1</span>
+                                                </div>
+                                                <div class="flex-1 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                    <p class="text-sm">Bank issues NID</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">2</span>
+                                                </div>
+                                                <div class="flex-1 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                    <p class="text-sm">Investor purchases NID</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">3</span>
+                                                </div>
+                                                <div class="flex-1 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                    <p class="text-sm">Investor may hold until maturity...</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">4a</span>
+                                                </div>
+                                                <div class="flex-1 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                    <p class="text-sm">...or sell in secondary market</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">4b</span>
+                                                </div>
+                                                <div class="flex-1 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                    <p class="text-sm">Bank redeems NID at maturity</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Types of Accounts Tab -->
+        <section id="account-types" x-show="currentTab === 'account-types'" class="progress-section" x-effect="if(currentTab === 'account-types') markSectionVisited()">
+            <div class="tab-content" :class="{ 'active': currentTab === 'account-types' }">
+                <h2 class="text-3xl font-bold mb-6 text-primary-600 dark:text-primary-400">Types of Accounts</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-user text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Individual Account</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Basic account type for a single person.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Individual Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• For any individual with contractual capacity</li>
+                                    <li>• Includes married women with their own accounts</li>
+                                    <li>• Undischarged bankrupts cannot operate current accounts</li>
+                                    <li>• Single ownership and control</li>
+                                    <li>• Requires valid ID and minimum deposit</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-child text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Minor Account</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Account for individuals under 18 years.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Minor Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• For persons under 18 (Age of Majority Act 1971)</li>
+                                    <li>• Limited contractual capacity</li>
+                                    <li>• Can draw/endorse cheques under Bills of Exchange Act</li>
+                                    <li>• Current accounts allowed if kept in credit</li>
+                                    <li>• Requires parent/guardian approval for ages 12-18</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-user-friends text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Joint Account</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Account owned by two or more individuals.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Joint Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Account in name of two or more parties (not trustees, administrators, executors or partners)</li>
+                                    <li>• Common between family members</li>
+                                    <li>• Requires written mandate signed by all parties</li>
+                                    <li>• Typically includes "survivorship clause"</li>
+                                    <li>• All account holders have deposit/withdrawal rights</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-shield-alt text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Trustee Account</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Account held for beneficiaries' benefit.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Trustee Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Trustee holds property for beneficiaries' benefit</li>
+                                    <li>• Created by Trust Deed</li>
+                                    <li>• Requires trustee ID, Trust Deed copy, signatures</li>
+                                    <li>• Trustees generally can't delegate powers</li>
+                                    <li>• All trustees must sign cheques unless otherwise specified</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-handshake text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Partnership Account</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Account for business with multiple owners.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Partnership Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• For businesses owned by 2-20 individuals</li>
+                                    <li>• Registration through Companies Commission of Malaysia (SSM)</li>
+                                    <li>• Foreign nationals need permanent residence permit</li>
+                                    <li>• Dissolution by agreement, law, death/bankruptcy, or court order</li>
+                                    <li>• All partners typically have authority over account</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-file-signature text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Executor &amp; Administrator</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Accounts managing deceased estates.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Executor &amp; Administrator</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Executor: Named in will to manage estate</li>
+                                    <li>• Administrator: Court-appointed if no will exists</li>
+                                    <li>• Requires letter of probate/administration</li>
+                                    <li>• All executors/administrators must sign if more than one</li>
+                                    <li>• Cannot delegate power to third parties</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-building text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Companies Account</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Account for corporate entities.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Companies Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• For legally registered companies</li>
+                                    <li>• Application from two directors or director and secretary</li>
+                                    <li>• Requires board resolution, M&amp;A, officer IDs</li>
+                                    <li>• Types: Limited by shares, guarantee, unlimited, or both</li>
+                                    <li>• Authorized signatories specified in mandate</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ flipped: false }" @click="flipped = !flipped" class="card-flip h-64 cursor-pointer" :class="{'flipped': flipped}">
+                        <div class="card-flip-inner relative w-full h-full">
+                            <div class="card-flip-front absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-center mb-4">
+                                    <i class="fas fa-users-cog text-4xl text-primary-500"></i>
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-xl font-semibold mb-2">Club &amp; Societies</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Account for non-profit organizations.</p>
+                                </div>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to learn more)</p>
+                            </div>
+                            <div class="card-flip-back absolute w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h3 class="text-lg font-semibold mb-3">Club &amp; Societies Account</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• For non-profit organizations</li>
+                                    <li>• Requires constitution, meeting minutes</li>
+                                    <li>• Application by two authorized office bearers</li>
+                                    <li>• Typically RM2,000 minimum initial deposit</li>
+                                    <li>• Club rubber stamp with registration number required</li>
+                                </ul>
+                                <p class="text-sm text-center text-primary-500 mt-4">(Click to flip back)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+                    <h3 class="text-2xl font-semibold mb-4">Account Opening Process Overview</h3>
+                    
+                    <div x-data="{ currentStep: 1 }" class="mb-6">
+                        <div class="relative">
+                            <div class="absolute left-0 top-5 w-full h-1 bg-gray-200 dark:bg-gray-700"></div>
+                            <div class="flex justify-between relative">
+                                <div @click="currentStep = 1" :class="{'text-primary-500': currentStep >= 1, 'text-gray-400 dark:text-gray-500': currentStep < 1}" class="flex flex-col items-center cursor-pointer z-10">
+                                    <div :class="{'bg-primary-500': currentStep >= 1, 'bg-gray-300 dark:bg-gray-600': currentStep < 1}" class="w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                        <i class="fas fa-user-check text-white"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Identification</span>
+                                </div>
+                                
+                                <div @click="currentStep = 2" :class="{'text-primary-500': currentStep >= 2, 'text-gray-400 dark:text-gray-500': currentStep < 2}" class="flex flex-col items-center cursor-pointer z-10">
+                                    <div :class="{'bg-primary-500': currentStep >= 2, 'bg-gray-300 dark:bg-gray-600': currentStep < 2}" class="w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                        <i class="fas fa-file-alt text-white"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Documentation</span>
+                                </div>
+                                
+                                <div @click="currentStep = 3" :class="{'text-primary-500': currentStep >= 3, 'text-gray-400 dark:text-gray-500': currentStep < 3}" class="flex flex-col items-center cursor-pointer z-10">
+                                    <div :class="{'bg-primary-500': currentStep >= 3, 'bg-gray-300 dark:bg-gray-600': currentStep < 3}" class="w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                        <i class="fas fa-signature text-white"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Application</span>
+                                </div>
+                                
+                                <div @click="currentStep = 4" :class="{'text-primary-500': currentStep >= 4, 'text-gray-400 dark:text-gray-500': currentStep < 4}" class="flex flex-col items-center cursor-pointer z-10">
+                                    <div :class="{'bg-primary-500': currentStep >= 4, 'bg-gray-300 dark:bg-gray-600': currentStep < 4}" class="w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                        <i class="fas fa-money-bill-wave text-white"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Initial Deposit</span>
+                                </div>
+                                
+                                <div @click="currentStep = 5" :class="{'text-primary-500': currentStep >= 5, 'text-gray-400 dark:text-gray-500': currentStep < 5}" class="flex flex-col items-center cursor-pointer z-10">
+                                    <div :class="{'bg-primary-500': currentStep >= 5, 'bg-gray-300 dark:bg-gray-600': currentStep < 5}" class="w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                        <i class="fas fa-check-circle text-white"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Activation</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+                            <div x-show="currentStep === 1" class="fade-in">
+                                <h4 class="text-xl font-semibold mb-3">Step 1: Identification &amp; Eligibility</h4>
+                                <p class="mb-4">The bank verifies the identity of the applicant and determines their eligibility to open the specific type of account.</p>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Verify MyKad, passport or other identification documents</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Check age and contractual capacity of applicant</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>For business accounts, verify business registration with SSM</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Screen for bankruptcies or other legal barriers</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div x-show="currentStep === 2" class="fade-in">
+                                <h4 class="text-xl font-semibold mb-3">Step 2: Documentation Requirements</h4>
+                                <p class="mb-4">Different account types require specific supporting documents:</p>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                                        <thead class="bg-gray-50 dark:bg-gray-700">
+                                            <tr>
+                                                <th class="py-2 px-4 text-left">Account Type</th>
+                                                <th class="py-2 px-4 text-left">Required Documents</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tr>
+                                                <td class="py-2 px-4">Individual</td>
+                                                <td class="py-2 px-4">MyKad/Passport, proof of address</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4">Joint</td>
+                                                <td class="py-2 px-4">IDs for all parties, signed mandate with instructions</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4">Trust</td>
+                                                <td class="py-2 px-4">Trust Deed, trustee IDs, specimen signatures</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4">Companies</td>
+                                                <td class="py-2 px-4">Board resolution, M&amp;A, officer IDs, mandate</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4">Club/Society</td>
+                                                <td class="py-2 px-4">Constitution, meeting minutes, officer IDs</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div x-show="currentStep === 3" class="fade-in">
+                                <h4 class="text-xl font-semibold mb-3">Step 3: Application Completion</h4>
+                                <p class="mb-4">The applicant completes and submits the account opening application and related forms:</p>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Account opening form with all required information</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Specimen signature form</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Online/mobile banking registration (if applicable)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>FATCA/CRS self-certification form</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Debit card application (if applicable)</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div x-show="currentStep === 4" class="fade-in">
+                                <h4 class="text-xl font-semibold mb-3">Step 4: Initial Deposit</h4>
+                                <p class="mb-4">The customer makes the minimum required deposit to activate the account.</p>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
+                                    <h5 class="font-semibold mb-2">Common Minimum Deposit Requirements:</h5>
+                                    <ul class="space-y-1">
+                                        <li class="flex justify-between">
+                                            <span>Savings Account:</span>
+                                            <span>RM20 - RM1,000</span>
+                                        </li>
+                                        <li class="flex justify-between">
+                                            <span>Current Account:</span>
+                                            <span>RM500 - RM1,000</span>
+                                        </li>
+                                        <li class="flex justify-between">
+                                            <span>Fixed Deposit:</span>
+                                            <span>RM500 - RM5,000</span>
+                                        </li>
+                                        <li class="flex justify-between">
+                                            <span>Club/Society Account:</span>
+                                            <span>RM2,000</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <p>Payment can typically be made via cash, check, or electronic transfer, depending on the bank's policies.</p>
+                            </div>
+                            
+                            <div x-show="currentStep === 5" class="fade-in">
+                                <h4 class="text-xl font-semibold mb-3">Step 5: Account Activation &amp; Setup</h4>
+                                <p class="mb-4">The bank completes final verification and activates the account:</p>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Account number generation</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Issuance of passbook/debit card/cheque book (as applicable)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Activation of online/mobile banking access</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Provision of account terms and conditions documentation</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                        <span>Customer education on account features and services</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="flex justify-between mt-6">
+                                <button @click="currentStep = currentStep > 1 ? currentStep - 1 : 1" :class="{'opacity-50 cursor-not-allowed': currentStep === 1}" class="bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-300 px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                                </button>
+                                <button @click="currentStep = currentStep < 5 ? currentStep + 1 : 5" :class="{'opacity-50 cursor-not-allowed': currentStep === 5}" class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium">
+                                    Next <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-primary-50 dark:bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">Real-life Example: Joint Account Opening</h3>
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-2/3">
+                            <p class="mb-4">Married couple John and Lisa decide to open a joint savings account at Hong Leong Bank to manage their household expenses. Here's how the process works:</p>
+                            <ol class="space-y-3">
+                                <li class="flex items-start">
+                                    <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">1</span>
+                                    </div>
+                                    <div>
+                                        <p><strong>Initial Visit:</strong> Both John and Lisa visit the bank together with their MyKad IDs and proof of address.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">2</span>
+                                    </div>
+                                    <div>
+                                        <p><strong>Documentation:</strong> They complete the joint account application form, specifying in the mandate that either of them can sign to withdraw funds.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">3</span>
+                                    </div>
+                                    <div>
+                                        <p><strong>Survivorship Clause:</strong> They review and agree to the survivorship clause, which ensures that if one dies, the other automatically has full ownership of the account.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">4</span>
+                                    </div>
+                                    <div>
+                                        <p><strong>Initial Deposit:</strong> They make an initial deposit of RM2,000 to open the account.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="bg-primary-100 dark:bg-primary-900 rounded-full w-6 h-6 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-primary-600 dark:text-primary-300 text-sm font-medium">5</span>
+                                    </div>
+                                    <div>
+                                        <p><strong>Account Setup:</strong> They set up online banking access for both users and arrange for their respective salaries to be deposited into this account.</p>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="md:w-1/3">
+                            <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
+                                <h4 class="font-semibold mb-3">Benefits of Their Joint Account:</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                        <span>Simplified household financial management</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                        <span>Convenient access for both partners</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                        <span>Financial continuity in case one partner is unavailable</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                        <span>Protection through survivorship clause</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                        <span>PIDM protection up to RM250,000</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PIDM Tab -->
+        <section id="pidm" x-show="currentTab === 'pidm'" class="progress-section" x-effect="if(currentTab === 'pidm') markSectionVisited()">
+            <div class="tab-content" :class="{ 'active': currentTab === 'pidm' }">
+                <div class="flex flex-col md:flex-row items-center mb-8">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8">
+                        <h2 class="text-3xl font-bold mb-4 text-primary-600 dark:text-primary-400">Perbadanan Insurans Deposit Malaysia (PIDM)</h2>
+                        <p class="text-lg mb-6">PIDM is a Malaysian government agency that protects depositors against the loss of their insured deposits in the unlikely event a member bank or insurer fails.</p>
+                        <div class="bg-primary-50 dark:bg-gray-800 p-4 rounded-lg">
+                            <h3 class="font-semibold mb-2">Key Points</h3>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>Protects deposits up to RM250,000 per depositor per member bank</li>
+                                <li>Automatic coverage - no application or fee required</li>
+                                <li>Covers conventional and Islamic deposits</li>
+                                <li>Government-backed statutory body</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 flex justify-center">
+                        <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_yt7ujont.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop="" autoplay=""></lottie-player>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-4">What PIDM Protects</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-check text-green-500 dark:text-green-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Deposits in Member Institutions</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Savings, current, and fixed deposit accounts in PIDM member banks.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-check text-green-500 dark:text-green-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Foreign Currency Deposits</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Deposits in foreign currencies are also protected and converted to Ringgit Malaysia.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-check text-green-500 dark:text-green-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Joint Accounts</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Each joint account holder's share is insured separately up to RM250,000.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-check text-green-500 dark:text-green-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Trust Accounts</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Each beneficiary's interest is protected separately up to RM250,000.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-4">What PIDM Does Not Protect</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-red-100 dark:bg-red-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-times text-red-500 dark:text-red-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Investment Products</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Stocks, bonds, unit trusts, and other securities.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-red-100 dark:bg-red-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-times text-red-500 dark:text-red-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Deposits in Non-Member Institutions</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Deposits in finance companies or institutions not listed as PIDM members.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-red-100 dark:bg-red-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-times text-red-500 dark:text-red-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Deposits Exceeding RM250,000</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">The portion of deposits that exceeds the RM250,000 limit per depositor per institution.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 bg-red-100 dark:bg-red-900 rounded-full p-2 mr-4">
+                                    <i class="fas fa-times text-red-500 dark:text-red-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Digital Assets</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Cryptocurrencies and other digital currencies are not protected by PIDM.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+                    <h3 class="text-xl font-semibold mb-4">How PIDM Protection Works</h3>
+                    
+                    <div x-data="{ activeStep: 'normal' }" class="mb-6">
+                        <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <button @click="activeStep = 'normal'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': activeStep === 'normal'}" class="px-4 py-2 transition-colors duration-200">
+                                Normal Operations
+                            </button>
+                            <button @click="activeStep = 'failure'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': activeStep === 'failure'}" class="px-4 py-2 transition-colors duration-200">
+                                Bank Failure Scenario
+                            </button>
+                            <button @click="activeStep = 'claim'" :class="{'text-primary-500 border-b-2 border-primary-500 -mb-px font-medium': activeStep === 'claim'}" class="px-4 py-2 transition-colors duration-200">
+                                Claim Process
+                            </button>
+                        </div>
+                        
+                        <div x-show="activeStep === 'normal'" class="fade-in">
+                            <div class="flex flex-col md:flex-row">
+                                <div class="md:w-2/3 pr-0 md:pr-8">
+                                    <h4 class="font-semibold mb-3">During Normal Banking Operations</h4>
+                                    <ol class="space-y-4">
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">1</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Automatic Coverage:</strong> All depositors in PIDM member banks are automatically protected, with no application or fee required.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">2</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Member Institutions:</strong> PIDM ensures member institutions adhere to sound financial practices and regulatory requirements.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">3</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Monitoring:</strong> PIDM continuously monitors the financial health of its member institutions in coordination with Bank Negara Malaysia.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">4</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Premium Collection:</strong> Member institutions pay annual premiums to PIDM based on their risk profiles and deposit base.</p>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                                <div class="md:w-1/3 mt-6 md:mt-0">
+                                    <div class="bg-blue-50 dark:bg-gray-700 p-4 rounded-lg">
+                                        <h5 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">PIDM Member Institutions</h5>
+                                        <p class="mb-3">All commercial banks operating in Malaysia are PIDM members, including:</p>
+                                        <ul class="space-y-1 text-sm">
+                                            <li>• Maybank</li>
+                                            <li>• CIMB Bank</li>
+                                            <li>• Public Bank</li>
+                                            <li>• RHB Bank</li>
+                                            <li>• Hong Leong Bank</li>
+                                            <li>• AmBank</li>
+                                            <li>• And many more...</li>
+                                        </ul>
+                                        <p class="mt-3 text-sm">A full list of member institutions is available on the PIDM website.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div x-show="activeStep === 'failure'" class="fade-in">
+                            <div class="flex flex-col md:flex-row">
+                                <div class="md:w-2/3 pr-0 md:pr-8">
+                                    <h4 class="font-semibold mb-3">In the Event of a Bank Failure</h4>
+                                    <ol class="space-y-4">
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">1</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Regulatory Action:</strong> Bank Negara Malaysia would first take regulatory actions to address issues at the troubled institution.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">2</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>PIDM Intervention:</strong> If the situation deteriorates, PIDM can intervene using various resolution tools, including assuming control of the failing institution.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">3</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Resolution Options:</strong> PIDM might arrange a transfer of deposits to a healthy institution, establish a bridge institution, or provide financial assistance.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">4</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Deposit Insurance Payout:</strong> If needed, PIDM would reimburse depositors up to the insured limit of RM250,000 per depositor per institution.</p>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                                <div class="md:w-1/3 mt-6 md:mt-0">
+                                    <div class="bg-yellow-50 dark:bg-gray-700 p-4 rounded-lg">
+                                        <h5 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-2">Important Note</h5>
+                                        <p>Bank failures are extremely rare in Malaysia due to the strong regulatory framework overseen by Bank Negara Malaysia and PIDM's early intervention mechanisms.</p>
+                                        <p class="mt-3">The deposit insurance system aims to maintain public confidence in the banking system and protect small depositors from losses.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div x-show="activeStep === 'claim'" class="fade-in">
+                            <div class="flex flex-col md:flex-row">
+                                <div class="md:w-2/3 pr-0 md:pr-8">
+                                    <h4 class="font-semibold mb-3">Claim Process for Depositors</h4>
+                                    <ol class="space-y-4">
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">1</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Public Notification:</strong> PIDM would make a public announcement through various media channels if a member institution fails.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">2</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Depositor Verification:</strong> PIDM would verify depositor information using the failed institution's records.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">3</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Payment Methods:</strong> Reimbursement could be made via various methods including direct deposit to a new account, cheques, or other payment mechanisms.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">4</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Timing:</strong> PIDM aims to reimburse depositors as quickly as possible, typically within days or weeks of the failure.</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex">
+                                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                                <span class="text-primary-600 dark:text-primary-300 font-medium">5</span>
+                                            </div>
+                                            <div>
+                                                <p><strong>Uninsured Deposits:</strong> Depositors with amounts exceeding RM250,000 may receive partial recovery of the uninsured portion during the liquidation process.</p>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                                <div class="md:w-1/3 mt-6 md:mt-0">
+                                    <div class="bg-white dark:bg-gray-700 shadow rounded-lg p-4">
+                                        <h5 class="font-semibold mb-3">PIDM Payout Simulation</h5>
+                                        <div x-data="{ deposits: 300000 }">
+                                            <div class="mb-4">
+                                                <label class="block text-sm font-medium mb-1">Your Total Deposits (RM)</label>
+                                                <input type="number" x-model="deposits" min="0" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm text-base focus:ring-primary-500 focus:border-primary-500">
+                                            </div>
+                                            
+                                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mb-3">
+                                                <div class="flex justify-between mb-1">
+                                                    <span>Protected Amount:</span>
+                                                    <span class="font-semibold text-green-600 dark:text-green-400">RM <span x-text="Math.min(deposits, 250000).toLocaleString()"></span></span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span>Unprotected Amount:</span>
+                                                    <span class="font-semibold text-red-600 dark:text-red-400">RM <span x-text="Math.max(0, deposits - 250000).toLocaleString()"></span></span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="relative h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                <div class="absolute left-0 top-0 bottom-0 bg-green-500 dark:bg-green-600 rounded-full" :style="`width: ${Math.min(100, (Math.min(deposits, 250000) / deposits) * 100)}%`"></div>
+                                                <div x-show="deposits > 250000" class="absolute left-0 top-0 bottom-0 bg-red-500 dark:bg-red-600 rounded-full" :style="`left: ${(Math.min(deposits, 250000) / deposits) * 100}%; width: ${Math.min(100, (Math.max(0, deposits - 250000) / deposits) * 100)}%`"></div>
+                                            </div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                                <span x-text="Math.round((Math.min(deposits, 250000) / deposits) * 100)"></span>% protected by PIDM
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-primary-50 dark:bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">Maximizing Your PIDM Protection</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-3">Tips for Better Protection</h4>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                                    <span><strong>Spread deposits</strong> across multiple PIDM member banks if you have more than RM250,000.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                                    <span><strong>Use different ownership categories</strong> at the same bank (individual, joint, trust accounts) as each category has separate insurance coverage.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                                    <span><strong>Verify membership status</strong> of your bank with PIDM's official list of member institutions.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                                    <span><strong>Keep records</strong> of your deposits, including account numbers and statements.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                                    <span><strong>Stay informed</strong> about changes to PIDM policies and coverage limits.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-3">Example: Multiple Ownership Categories</h4>
+                            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                                <p class="mb-3">Ahmad has the following accounts at XYZ Bank:</p>
+                                <ul class="space-y-2 mb-4">
+                                    <li class="flex justify-between">
+                                        <span>Individual Savings Account:</span>
+                                        <span class="font-semibold">RM200,000</span>
+                                    </li>
+                                    <li class="flex justify-between">
+                                        <span>Joint Account with Wife:</span>
+                                        <span class="font-semibold">RM300,000 (RM150,000 each)</span>
+                                    </li>
+                                    <li class="flex justify-between">
+                                        <span>Trust Account for Child:</span>
+                                        <span class="font-semibold">RM100,000</span>
+                                    </li>
+                                </ul>
+                                <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
+                                    <p class="font-semibold">Total PIDM Coverage: <span class="text-green-600 dark:text-green-400">RM450,000</span></p>
+                                    <p class="text-sm mt-1">Each ownership category has its own RM250,000 protection limit.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Check Tab -->
+        <section id="quiz" x-show="currentTab === 'quiz'" x-effect="if(currentTab === 'quiz') markSectionVisited()">
+            <div class="tab-content" :class="{ 'active': currentTab === 'quiz' }">
+                <div class="max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-6 text-primary-600 dark:text-primary-400">Knowledge Check</h2>
+                    
+                    <template x-if="!quizStarted &amp;&amp; !quizComplete">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+                            <lottie-player src="https://assets9.lottiefiles.com/packages/lf20_rbtawnwz.json" background="transparent" speed="1" style="width: 200px; height: 200px; margin: 0 auto;" loop="" autoplay=""></lottie-player>
+                            <h3 class="text-2xl font-semibold mb-3">Ready to Test Your Knowledge?</h3>
+                            <p class="mb-6">This quiz will test your understanding of bank deposit accounts, account types, and PIDM protection.</p>
+                            <button @click="quizStarted = true" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center mx-auto">
+                                <i class="fas fa-play-circle mr-2"></i> Start Quiz
+                            </button>
+                        </div>
+                    </template>
+                    
+                    <template x-if="quizStarted &amp;&amp; !quizComplete">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold">Question <span x-text="currentQuizIndex + 1"></span> of <span x-text="quizQuestions.length"></span></h3>
+                                <span class="bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 px-3 py-1 rounded-full text-sm font-medium">
+                                    <span x-text="currentQuizIndex + 1"></span>/<span x-text="quizQuestions.length"></span>
+                                </span>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-lg font-medium mb-4" x-text="quizQuestions[currentQuizIndex].question"></p>
+                                <div class="space-y-3">
+                                    <template x-for="(option, index) in quizQuestions[currentQuizIndex].options" :key="index">
+                                        <div @click="selectQuizOption(currentQuizIndex, index)" class="quiz-option border border-gray-200 dark:border-gray-700 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md" :class="{
+                                                'correct': quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; index === quizQuestions[currentQuizIndex].correctAnswer,
+                                                'incorrect': quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; index !== quizQuestions[currentQuizIndex].correctAnswer
+                                            }">
+                                            <div class="flex items-center">
+                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center mr-3" :class="{
+                                                        'border-green-500 bg-green-100 dark:bg-green-900': quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; index === quizQuestions[currentQuizIndex].correctAnswer,
+                                                        'border-red-500 bg-red-100 dark:bg-red-900': quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; index !== quizQuestions[currentQuizIndex].correctAnswer,
+                                                        'border-primary-500 bg-primary-100 dark:bg-primary-900': quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; quizQuestions[currentQuizIndex].userAnswer !== null
+                                                    }">
+                                                    <template x-if="quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; index === quizQuestions[currentQuizIndex].correctAnswer">
+                                                        <i class="fas fa-check text-green-500"></i>
+                                                    </template>
+                                                    <template x-if="quizQuestions[currentQuizIndex].userAnswer === index &amp;&amp; index !== quizQuestions[currentQuizIndex].correctAnswer">
+                                                        <i class="fas fa-times text-red-500"></i>
+                                                    </template>
+                                                </div>
+                                                <span x-text="option"></span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <button @click="currentQuizIndex = currentQuizIndex > 0 ? currentQuizIndex - 1 : 0" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors duration-200" :class="{'opacity-50 cursor-not-allowed': currentQuizIndex === 0}">
+                                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                                </button>
+                                <div>
+                                    <template x-for="(question, index) in quizQuestions" :key="index">
+                                        <span class="inline-block w-3 h-3 rounded-full mx-1" :class="{
+                                                'bg-green-500': question.userAnswer === question.correctAnswer &amp;&amp; question.userAnswer !== null,
+                                                'bg-red-500': question.userAnswer !== question.correctAnswer &amp;&amp; question.userAnswer !== null,
+                                                'bg-primary-500': currentQuizIndex === index &amp;&amp; question.userAnswer === null,
+                                                'bg-gray-300 dark:bg-gray-600': question.userAnswer === null &amp;&amp; currentQuizIndex !== index
+                                            }"></span>
+                                    </template>
+                                </div>
+                                <button @click="currentQuizIndex = currentQuizIndex < quizQuestions.length - 1 ? currentQuizIndex + 1 : quizQuestions.length - 1" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors duration-200" :class="{'opacity-50 cursor-not-allowed': currentQuizIndex === quizQuestions.length - 1}">
+                                    Next <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <template x-if="quizComplete">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+                            <div class="mb-6">
+                                <div class="w-24 h-24 mx-auto bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-trophy text-4xl text-primary-500"></i>
+                                </div>
+                                <h3 class="text-2xl font-semibold mb-2">Quiz Completed!</h3>
+                                <p class="text-lg">You scored <span class="font-bold text-primary-500" x-text="score"></span> out of <span x-text="quizQuestions.length"></span></p>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mt-4">
+                                    <div class="bg-primary-500 h-4 rounded-full" :style="`width: ${(score/quizQuestions.length) * 100}%`"></div>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" x-text="`${Math.round((score/quizQuestions.length) * 100)}% correct`"></p>
+                            </div>
+                            
+                            <div class="space-y-4 mb-6">
+                                <template x-for="(question, index) in quizQuestions" :key="index">
+                                    <div class="text-left bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 mt-1">
+                                                <template x-if="question.userAnswer === question.correctAnswer">
+                                                    <div class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                                        <i class="fas fa-check text-green-500"></i>
+                                                    </div>
+                                                </template>
+                                                <template x-if="question.userAnswer !== question.correctAnswer">
+                                                    <div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+                                                        <i class="fas fa-times text-red-500"></i>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="ml-3 flex-1">
+                                                <p class="font-medium" x-text="question.question"></p>
+                                                <p class="mt-1">
+                                                    <span class="text-sm">Your answer: </span>
+                                                    <span x-text="question.options[question.userAnswer]" :class="{
+                                                            'text-green-600 dark:text-green-400 font-medium': question.userAnswer === question.correctAnswer,
+                                                            'text-red-600 dark:text-red-400 font-medium': question.userAnswer !== question.correctAnswer
+                                                        }"></span>
+                                                </p>
+                                                <template x-if="question.userAnswer !== question.correctAnswer">
+                                                    <p class="text-sm mt-1">
+                                                        <span>Correct answer: </span>
+                                                        <span class="text-green-600 dark:text-green-400 font-medium" x-text="question.options[question.correctAnswer]"></span>
+                                                    </p>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button @click="restartQuiz(); quizStarted = true" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-redo mr-2"></i> Retake Quiz
+                                </button>
+                                <button @click="currentTab = 'overview'; quizStarted = false" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-book mr-2"></i> Review Materials
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-life Examples Tab -->
+        <section id="examples" x-show="currentTab === 'examples'" x-effect="if(currentTab === 'examples') markSectionVisited()">
+            <div class="tab-content" :class="{ 'active': currentTab === 'examples' }">
+                <h2 class="text-3xl font-bold mb-6 text-primary-600 dark:text-primary-400">Real-life Banking Examples</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <template x-for="(example, index) in examples" :key="index">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform hover:scale-105 duration-300 cursor-pointer" @click="showExample(example)">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
+                                    <i :class="`fas ${example.icon} text-primary-500 text-xl`"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold" x-text="example.title"></h3>
+                            </div>
+                            <p class="line-clamp-3" x-text="example.content"></p>
+                            <button class="mt-4 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-medium flex items-center">
+                                Read more <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-4">Compare Account Types for Different Needs</h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="py-3 px-4 text-left">Banking Need</th>
+                                    <th class="py-3 px-4 text-left">Recommended Account Type</th>
+                                    <th class="py-3 px-4 text-left">Key Benefits</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tr>
+                                    <td class="py-3 px-4">Everyday Banking</td>
+                                    <td class="py-3 px-4">Current Account</td>
+                                    <td class="py-3 px-4">
+                                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                                            <li>Cheque facilities</li>
+                                            <li>Unlimited transactions</li>
+                                            <li>Overdraft options</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4">Emergency Fund</td>
+                                    <td class="py-3 px-4">Savings Account</td>
+                                    <td class="py-3 px-4">
+                                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                                            <li>Easy access to funds</li>
+                                            <li>Some interest earnings</li>
+                                            <li>Low minimum balance</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4">Building Wealth</td>
+                                    <td class="py-3 px-4">Fixed Deposit</td>
+                                    <td class="py-3 px-4">
+                                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                                            <li>Higher interest rates</li>
+                                            <li>Guaranteed returns</li>
+                                            <li>Protection from impulsive spending</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4">Child's Education</td>
+                                    <td class="py-3 px-4">Trust Account</td>
+                                    <td class="py-3 px-4">
+                                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                                            <li>Controlled by trustee for beneficiary</li>
+                                            <li>Can specify how funds are used</li>
+                                            <li>Separate PIDM protection limit</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4">Household Finances</td>
+                                    <td class="py-3 px-4">Joint Account</td>
+                                    <td class="py-3 px-4">
+                                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                                            <li>Shared access for all holders</li>
+                                            <li>Survivorship benefits</li>
+                                            <li>Simplified bill payments</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4">Business Operations</td>
+                                    <td class="py-3 px-4">Corporate Account</td>
+                                    <td class="py-3 px-4">
+                                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                                            <li>Multiple authorized signatories</li>
+                                            <li>Business-specific services</li>
+                                            <li>Separate from personal finances</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Example Modal -->
+    <div x-show="showExampleModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4 text-center">
+            <div @click="showExampleModal = false" class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+            
+            <div class="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-primary-600 dark:text-primary-400" x-text="currentExample.title"></h3>
+                    <button @click="showExampleModal = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mt-4 mb-6">
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                            <i :class="`fas ${currentExample.icon} text-primary-500 text-3xl`"></i>
+                        </div>
+                    </div>
+                    <p class="text-lg leading-relaxed" x-text="currentExample.content"></p>
+                </div>
+                
+                <div class="mt-6 bg-primary-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-2">Key Takeaways</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <template x-if="currentExample.title === 'Savings Account Example'">
+                            <div>
+                                <li>Initial deposit requirements vary by bank</li>
+                                <li>PIDM protection up to RM250,000</li>
+                                <li>Lower interest rates but greater flexibility</li>
+                                <li>Modern banking features included</li>
+                            </div>
+                        </template>
+                        <template x-if="currentExample.title === 'Current Account Example'">
+                            <div>
+                                <li>Higher minimum deposit than savings accounts</li>
+                                <li>Designed for frequent transactions</li>
+                                <li>Minimum balance requirements to avoid fees</li>
+                                <li>Includes cheque facilities for business needs</li>
+                            </div>
+                        </template>
+                        <template x-if="currentExample.title === 'Fixed Deposit Example'">
+                            <div>
+                                <li>Higher interest rates for longer terms</li>
+                                <li>Penalties for early withdrawal</li>
+                                <li>Guaranteed fixed returns</li>
+                                <li>Term options from 1 to 60 months</li>
+                            </div>
+                        </template>
+                        <template x-if="currentExample.title === 'Joint Account Example'">
+                            <div>
+                                <li>Equal access rights for both account holders</li>
+                                <li>Survivorship clause for continuity</li>
+                                <li>Simplifies shared expenses</li>
+                                <li>Mandate specifies signing requirements</li>
+                            </div>
+                        </template>
+                        <template x-if="currentExample.title === 'Trust Account Example'">
+                            <div>
+                                <li>Managed by trustee per Trust Deed terms</li>
+                                <li>Protected purpose-specific funds</li>
+                                <li>Beneficiary has limited or no access</li>
+                                <li>Separate PIDM protection limit</li>
+                            </div>
+                        </template>
+                    </ul>
+                </div>
+                
+                <div class="mt-6 flex justify-end">
+                    <button @click="showExampleModal = false" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-inner py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Chapter 3: Operations of Customer Accounts
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        Commercial Banking Operations &amp; Digital Banking | FIN370
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Created by UiTM Johor's Branch Lecturers
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+</body></html>
